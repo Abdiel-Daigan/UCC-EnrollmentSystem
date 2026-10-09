@@ -1,0 +1,12 @@
+<?php
+session_start();if(!isset($_SESSION["admin"])){header("Location:index.php");exit;}require"database.php";
+$students=$conn->query("SELECT student_id,student_number,first_name,last_name,course,year_level FROM students ORDER BY last_name");
+$subjects=$conn->query("SELECT * FROM subjects ORDER BY subject_code");
+if($_SERVER["REQUEST_METHOD"]==="POST"){
+$st=(int)$_POST["student_id"];$ay=$_POST["academic_year"];$sem=$_POST["semester"];$status=$_POST["status"];
+$s=$conn->prepare("INSERT INTO enrollments(student_id,academic_year,semester,status) VALUES(?,?,?,?)");$s->bind_param("isss",$st,$ay,$sem,$status);$s->execute();$eid=$conn->insert_id;
+foreach($_POST["subjects"]??[] as $sid){$sid=(int)$sid;$conn->query("INSERT INTO enrollment_subjects(enrollment_id,subject_id) VALUES($eid,$sid)");}header("Location:enrollments.php");exit;}
+?>
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Enrollment - UCC</title><link rel="stylesheet" href="css/style.css"></head><body><?php include"includes_nav.php";?><main class="container"><h2>Student Enrollment</h2><div class="card"><form method="post" onsubmit="return checkEnrollment()"><label>Student</label><select name="student_id" required><option value="">Select Student</option><?php while($s=$students->fetch_assoc()):?><option value="<?=$s["student_id"]?>"><?=$s["student_number"]?> - <?=htmlspecialchars($s["last_name"].", ".$s["first_name"]." (".$s["course"]." / ".$s["year_level"].")")?></option><?php endwhile;?></select>
+<div class="grid"><input name="academic_year" placeholder="Academic Year (e.g. 2026-2027)" required><select name="semester" required><option value="">Semester</option><option>1st Semester</option><option>2nd Semester</option><option>Summer</option></select><select name="status"><option>Pending</option><option>Approved</option></select></div>
+<h3>Subjects</h3><div class="subjects"><?php while($s=$subjects->fetch_assoc()):?><label class="subject"><input type="checkbox" name="subjects[]" value="<?=$s["subject_id"]?>" data-units="<?=$s["units"]?>"><span><b><?=htmlspecialchars($s["subject_code"])?></b> - <?=htmlspecialchars($s["subject_name"])?><small><?=$s["units"]?> units • <?=htmlspecialchars($s["course"])?> • <?=$s["year_level"]?></small></span></label><?php endwhile;?></div><p>Total Units: <b id="units">0</b></p><button class="btn primary">Submit Enrollment</button></form></div></main><script src="js/script.js"></script></body></html>

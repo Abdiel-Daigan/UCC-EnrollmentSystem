@@ -1,0 +1,2 @@
+<header class="topbar"><div class="brand">UNIDA CHRISTIAN COLLEGE<small>Enrollment System</small></div><nav>
+<a href="dashboard.php">Dashboard</a><a href="students.php">Students</a><a href="subjects.php">Subjects</a><a href="enrollment.php">Enrollment</a><a href="enrollments.php">Records</a><a class="logout" href="logout.php">Logout</a></nav></header>
